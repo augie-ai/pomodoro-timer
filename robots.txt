@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://pomodoro-timer.example.com/sitemap.xml
+Sitemap: https://pomodorotimer.one/sitemap.xml

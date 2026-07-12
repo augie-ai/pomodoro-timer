@@ -62,6 +62,32 @@
     .related-links a:hover { text-decoration: underline; }
     footer { text-align: center; padding: 32px 0; color: var(--text-secondary); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 40px; }
     footer a { color: var(--text-secondary); }
+    .timer-display-page {
+      font-size: clamp(3rem, 15vw, 5rem);
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      margin: 40px 0;
+      letter-spacing: -2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .start-button-page {
+      display: block;
+      width: fit-content;
+      margin: 20px auto;
+      background: #06d6a0;
+      color: #fff;
+      text-decoration: none;
+      padding: 15px 40px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(6,214,160,0.4);
+      border: none;
+      cursor: pointer;
+    }
+    .start-button-page:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(6,214,160,0.55); }
   </style>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-HFT9D6TFKV"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-HFT9D6TFKV");</script></head>
 <body>
@@ -81,9 +107,12 @@
 
   <p>This guide will show you how to leverage structured time, short breaks, and a distraction-free environment to boost your academic performance, reduce stress, and genuinely enjoy learning again.</p>
 
+  <div class="timer-display-page" id="timer-study-display">25:00</div>
+  <button class="start-button-page" id="start-study-timer">▶ Start Study Timer</button>
+
   <div class="cta-box">
-    <p>Ready to supercharge your study sessions? Start your first focused Pomodoro now!</p>
-    <a href="/" class="cta-btn">Launch Free Study Timer →</a>
+    <p>Want task lists, custom durations, and session stats? Try our full-featured Pomodoro timer.</p>
+    <a href="/" class="cta-btn">Go to Main Pomodoro Timer →</a>
   </div>
 
   <h2>Why Use a Study Timer? The Science of Focused Learning</h2>
@@ -150,5 +179,79 @@
   <p>© 2026 <a href="/">PomodoroTimer.one</a> — Free Study Timers for Academic Excellence</p>
   <p style="margin-top:6px; opacity:0.5;">The Pomodoro Technique® is a registered trademark of Francesco Cirillo. This site is not affiliated with him.</p>
 </footer>
+
+<script>
+  const timerDisplayStudy = document.getElementById('timer-study-display');
+  const startButtonStudy = document.getElementById('start-study-timer');
+  let timeLeftStudy = 25 * 60;
+  let timerIntervalStudy = null;
+  let runningStudy = false;
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function formatTime(s) { return `${pad(Math.floor(s / 60))}:${pad(s % 60)}`; }
+
+  function updateDisplayStudy() {
+    timerDisplayStudy.textContent = formatTime(timeLeftStudy);
+    document.title = `${formatTime(timeLeftStudy)} — Study Timer`;
+  }
+
+  function resetButtonStudy() {
+    startButtonStudy.textContent = '▶ Start Study Timer';
+    startButtonStudy.style.background = '#06d6a0';
+    startButtonStudy.style.boxShadow = '0 4px 20px rgba(6,214,160,0.4)';
+  }
+
+  function playBeepStudy() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 1);
+    } catch (e) { console.error('Audio playback failed:', e); }
+  }
+
+  function startTimerStudy() {
+    if (runningStudy) return;
+    runningStudy = true;
+    startButtonStudy.textContent = '⏸ Pause Timer';
+    startButtonStudy.style.background = '#e63946';
+    startButtonStudy.style.boxShadow = '0 4px 20px rgba(230,57,70,0.4)';
+
+    timerIntervalStudy = setInterval(() => {
+      if (timeLeftStudy <= 0) {
+        clearInterval(timerIntervalStudy);
+        runningStudy = false;
+        timeLeftStudy = 25 * 60;
+        resetButtonStudy();
+        updateDisplayStudy();
+        playBeepStudy();
+        return;
+      }
+      timeLeftStudy--;
+      updateDisplayStudy();
+    }, 1000);
+  }
+
+  function pauseTimerStudy() {
+    runningStudy = false;
+    clearInterval(timerIntervalStudy);
+    startButtonStudy.textContent = '▶ Resume Timer';
+    startButtonStudy.style.background = '#e63946';
+    startButtonStudy.style.boxShadow = '0 4px 20px rgba(230,57,70,0.4)';
+  }
+
+  startButtonStudy.addEventListener('click', () => {
+    if (runningStudy) { pauseTimerStudy(); } else { startTimerStudy(); }
+  });
+
+  updateDisplayStudy();
+</script>
 </body>
 </html>
